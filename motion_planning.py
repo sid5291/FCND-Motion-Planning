@@ -121,6 +121,7 @@ class MotionPlanning(Drone):
         self.target_position[2] = TARGET_ALTITUDE
 
         # TODO: read lat0, lon0 from colliders into floating point values
+        # Gives us the maps center coordinates !
         global_home_position = np.append(np.genfromtxt('colliders.csv', delimiter=' ',
                                 converters={1: lambda x: float(x.decode("utf-8").replace(',', ''))}, usecols=(1, 3),
                                 max_rows=1), DEFAULT_ALTITUDE)
@@ -144,11 +145,11 @@ class MotionPlanning(Drone):
         grid, north_offset, east_offset = create_grid(data, TARGET_ALTITUDE, SAFETY_DISTANCE)
         print("North offset = {0}, east offset = {1}".format(north_offset, east_offset))
         # Define starting point on the grid (this is just grid center)
-        grid_start = (-north_offset, -east_offset)
+        # grid_start = (-north_offset, -east_offset)
         # TODO: convert start position to current position rather than map center
-        grid_start = (self.local_position[0], self.local_position[1])
+        grid_start = (np.floor(self.local_position[0]), np.floor(self.local_position[1]))
         # Set goal as some arbitrary position on the grid
-        grid_goal = (self.local_position[0] + 30, self.local_position[1] + 30)
+        grid_goal = (np.floor(self.local_position[0] + 30), np.floor(self.local_position[1] + 30))
         # TODO: adapt to set goal as latitude / longitude position and convert
 
         # Run A* to find a path from start to goal
