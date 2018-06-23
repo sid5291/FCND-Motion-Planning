@@ -147,9 +147,9 @@ class MotionPlanning(Drone):
         # Define starting point on the grid (this is just grid center)
         # grid_start = (-north_offset, -east_offset)
         # TODO: convert start position to current position rather than map center
-        grid_start = (np.floor(self.local_position[0]), np.floor(self.local_position[1]))
+        grid_start = (int(np.floor(self.local_position[0])), int(np.floor(self.local_position[1])))
         # Set goal as some arbitrary position on the grid
-        grid_goal = (np.floor(self.local_position[0] + 30), np.floor(self.local_position[1] + 30))
+        grid_goal = (int(np.floor(self.local_position[0] + 30)), int(np.floor(self.local_position[1] + 30)))
         # TODO: adapt to set goal as latitude / longitude position and convert
 
         # Run A* to find a path from start to goal
