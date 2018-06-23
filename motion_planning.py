@@ -24,7 +24,7 @@ class States(Enum):
 
 class MotionPlanning(Drone):
 
-    def __init__(self, connection):
+    def __init__(self, connection=None):
         super().__init__(connection)
 
         self.target_position = np.array([0.0, 0.0, 0.0])
@@ -116,17 +116,24 @@ class MotionPlanning(Drone):
         print("Searching for a path ...")
         TARGET_ALTITUDE = 5
         SAFETY_DISTANCE = 5
+        DEFAULT_ALTITUDE = 0.0
 
         self.target_position[2] = TARGET_ALTITUDE
 
         # TODO: read lat0, lon0 from colliders into floating point values
-        
+        global_home_position = np.append(np.genfromtxt('colliders.csv', delimiter=' ',
+                                converters={1: lambda x: float(x.decode("utf-8").replace(',', ''))}, usecols=(1, 3),
+                                max_rows=1), DEFAULT_ALTITUDE)
         # TODO: set home position to (lon0, lat0, 0)
-
+        # Ensure to invert Lat Lon as it is fed to set_home_position as Lon Lat
+        self.set_home_position(global_home_position[1], global_home_position[0], global_home_position[2])
+        self._longitude = global_home_position[1]
+        self._latitude =  global_home_position[0]
+        self._altitude =  global_home_position[2]
         # TODO: retrieve current global position
- 
+        current_global_position = self.global_position
         # TODO: convert to current local position using global_to_local()
-        
+        current_local_position = global_to_local(current_global_position, self.global_home)
         print('global home {0}, position {1}, local position {2}'.format(self.global_home, self.global_position,
                                                                          self.local_position))
         # Read in obstacle map
@@ -138,7 +145,7 @@ class MotionPlanning(Drone):
         # Define starting point on the grid (this is just grid center)
         grid_start = (-north_offset, -east_offset)
         # TODO: convert start position to current position rather than map center
-        
+        grid_start = (self.local_position[0], self.local_position[1])
         # Set goal as some arbitrary position on the grid
         grid_goal = (-north_offset + 10, -east_offset + 10)
         # TODO: adapt to set goal as latitude / longitude position and convert
