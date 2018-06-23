@@ -121,7 +121,7 @@ class MotionPlanning(Drone):
             p3 = ret[i + 2]
 
             cells = bresenham(p1[0], p1[1], p3[0], p3[1])
-            if p3 in cells:
+            if p2 in cells:
                 del ret[i+1]
 
         return ret
@@ -166,7 +166,7 @@ class MotionPlanning(Drone):
                       int(np.floor(self.local_position[1])) - east_offset)
         # Set goal as some arbitrary position on the grid
         grid_goal = (int(np.floor(self.local_position[0] + 3)) - north_offset,
-                     int(np.floor(self.local_position[1]))     - east_offset)
+                     int(np.floor(self.local_position[1] + 0)) - east_offset)
         # TODO: adapt to set goal as latitude / longitude position and convert
 
         # Run A* to find a path from start to goal
