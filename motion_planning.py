@@ -2,6 +2,7 @@ import argparse
 import time
 import msgpack
 from enum import Enum, auto
+from bresenham import bresenham
 
 import numpy as np
 
@@ -111,6 +112,20 @@ class MotionPlanning(Drone):
         data = msgpack.dumps(self.waypoints)
         self.connection._master.write(data)
 
+    def prune_path(self, path):
+        ret = [point for point in path]
+        i=0
+        while i < (len(ret) - 2):
+            p1 = ret[i]
+            p2 = ret[i + 1]
+            p3 = ret[i + 2]
+
+            cells = bresenham(p1[0], p1[1], p3[0], p3[1])
+            if p3 in cells:
+                del ret[i+1]
+
+        return ret
+
     def plan_path(self):
         self.flight_state = States.PLANNING
         print("Searching for a path ...")
@@ -160,8 +175,9 @@ class MotionPlanning(Drone):
         print('Local Start and Goal: ', grid_start, grid_goal)
         path, _ = a_star(grid, heuristic, grid_start, grid_goal)
         # TODO: prune path to minimize number of waypoints
-        # TODO (if you're feeling ambitious): Try a different approach altogether!
 
+        # TODO (if you're feeling ambitious): Try a different approach altogether!
+        print(self.prune_path(path))
         # Convert path to waypoints
         waypoints = [[p[0] + north_offset, p[1] + east_offset, TARGET_ALTITUDE, 0] for p in path]
         # Set self.waypoints
