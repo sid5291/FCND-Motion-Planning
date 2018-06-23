@@ -136,6 +136,7 @@ class MotionPlanning(Drone):
         current_local_position = global_to_local(current_global_position, self.global_home)
         print('global home {0}, position {1}, local position {2}'.format(self.global_home, self.global_position,
                                                                          self.local_position))
+        print('Calculated local Position: {0}'.format(current_local_position))
         # Read in obstacle map
         data = np.loadtxt('colliders.csv', delimiter=',', dtype='Float64', skiprows=2)
         
@@ -147,7 +148,7 @@ class MotionPlanning(Drone):
         # TODO: convert start position to current position rather than map center
         grid_start = (self.local_position[0], self.local_position[1])
         # Set goal as some arbitrary position on the grid
-        grid_goal = (-north_offset + 10, -east_offset + 10)
+        grid_goal = (self.local_position[0] + 30, self.local_position[1] + 30)
         # TODO: adapt to set goal as latitude / longitude position and convert
 
         # Run A* to find a path from start to goal
