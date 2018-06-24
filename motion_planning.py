@@ -144,8 +144,8 @@ class GraphPlanner(object):
         if (self.start is None) or (self.goal is None):
             print("ERROR: Please add the start and goal to graph using add_start_and_goal")
             return
-        start = tuple(self.start[0], self.start[1])
-        goal = tuple(self.goal[0], self.goal[1])
+        start = (self.start[0], self.start[1])
+        goal = (self.goal[0], self.goal[1])
         path = []
         path_cost = 0
         queue = PriorityQueue()
