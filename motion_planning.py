@@ -361,7 +361,7 @@ class MotionPlanning(Drone):
         # TODO: add diagonal motions with a cost of sqrt(2) to your A* implementation
         # or move to a different search space such as a graph (not done here)
         print('Local Start and Goal: ', grid_start, grid_goal)
-        graph_path, _ = graph.a_star(heuristic())
+        graph_path, _ = graph.a_star(heuristic)
         path, _ = a_star(grid, heuristic, grid_start, grid_goal)
         # TODO: prune path to minimize number of waypoints
         path = self.prune_path(path)
