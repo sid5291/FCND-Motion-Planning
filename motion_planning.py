@@ -53,7 +53,7 @@ class GraphPlanner(object):
             self.polygons[(north, east)] = (p, height)
         self.tree = KDTree(list(self.polygons.keys()))
 
-    def generate_nodes(self, max_num_nodes=1000, max_alt=10):
+    def generate_nodes(self, max_num_nodes=200, max_alt=10):
         BUFFER = 2.0   # Add 2 Meter buffer due to drones overshoot characteristics
         # Add the corners of buildings as they would usually describe street junctions
         # This will add to available nodes to form a more robust graph
@@ -101,10 +101,7 @@ class GraphPlanner(object):
         print("Number of Nodes: {0}".format(len(self.nodes)))
 
     def collides(self, point):
-        # TODO: Determine whether the point collides
-        # with any obstacles.
-
-        closest_centroids = self.tree.query([(point[0], point[1])], k=5, return_distance=False)[0]
+        closest_centroids = self.tree.query([(point[0], point[1])], k=10, return_distance=False)[0]
         for centroid in closest_centroids:
             key = list(self.polygons.keys())[centroid]
             poly = self.polygons[key]
