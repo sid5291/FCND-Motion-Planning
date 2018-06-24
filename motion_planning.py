@@ -95,6 +95,8 @@ class GraphPlanner(object):
             dist = np.linalg.norm(np.array(point)-array, axis=1)
             nns = array[np.where(dist < 10.0)[0]]
             for nn in nns:
+                print(nn)
+                print(point)
                 if nn != point:
                     to_keep.remove(nn)
         self.nodes = to_keep
