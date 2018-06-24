@@ -402,7 +402,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--port', type=int, default=5760, help='Port number')
     parser.add_argument('--host', type=str, default='127.0.0.1', help="host address, i.e. '127.0.0.1'")
-    parser.add_argument('--graph', type=bool, action='store_true', help="Use Graph method for planning")
+    parser.add_argument('--graph', action='store_true', help="Use Graph method for planning")
     parser.add_argument('--n_goal', type=float, default=50.0, help="North Offset from Start for Goal" )
     parser.add_argument('--e_goal', type=float, default=50.0, help="East Offset from Start for Goal")
     args = parser.parse_args()
