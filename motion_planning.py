@@ -53,7 +53,7 @@ class GraphPlanner(object):
             self.polygons[(north, east)] = (p, height)
         self.tree = KDTree(list(self.polygons.keys()))
 
-    def generate_nodes(self, max_num_nodes=200, max_alt=10):
+    def generate_nodes(self, max_num_nodes=200, max_alt =5.0):
         BUFFER = 2.0   # Add 2 Meter buffer due to drones overshoot characteristics
         # Add the corners of buildings as they would usually describe street junctions
         # This will add to available nodes to form a more robust graph
@@ -101,7 +101,7 @@ class GraphPlanner(object):
         print("Number of Nodes: {0}".format(len(self.nodes)))
 
     def collides(self, point):
-        closest_centroids = self.tree.query([(point[0], point[1])], k=10, return_distance=False)[0]
+        closest_centroids = self.tree.query_radius([(point[0], point[1])], r=10.0, return_distance=False)[0]
         for centroid in closest_centroids:
             key = list(self.polygons.keys())[centroid]
             poly = self.polygons[key]
@@ -121,8 +121,8 @@ class GraphPlanner(object):
         point1 = self.convert_to_int(point1)
         point2 = self.convert_to_int(point2)
         cells = bresenham(point1[0], point1[1], point2[0], point2[1])
-        for cell in cells:
-            closest_centroids = self.tree.query([(cell[0], cell[1])], k=3, return_distance=False)[0]
+        for cell in cells[::10]:
+            closest_centroids = self.tree.query_radius([(cell[0], cell[1])], r=10.0, return_distance=False)[0]
             for centroid in closest_centroids:
                 key = list(self.polygons.keys())[centroid]
                 poly = self.polygons[key]
