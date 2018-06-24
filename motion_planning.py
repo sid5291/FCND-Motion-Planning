@@ -367,7 +367,7 @@ class MotionPlanning(Drone):
         # Convert path to waypoints
         waypoints = [[p[0] + north_offset, p[1] + east_offset, TARGET_ALTITUDE, 0] for p in path]
         graph_waypoints = [[p[0], p[1], TARGET_ALTITUDE, 0] for p in graph_path]
-        for  point in graph_waypoints:
+        for  point in waypoints:
             print("Point: {0}".format(point))
         # Set self.waypoints
         self.waypoints = graph_waypoints
