@@ -84,12 +84,16 @@ class GraphPlanner(object):
             self.nodes.append((UL) + (max_alt,))
             self.nodes.append((LR) + (max_alt,))
             self.nodes.append((UR) + (max_alt,))
-        # prune Nodes
+        # prune colliding nodes Nodes
         to_keep = []
         for point in self.nodes:
             if not self.collides(point):
                 to_keep.append(point)
+        # prune very nodes within 2m
+        #for point in to_keep:
+
         self.nodes = to_keep
+        print("Number of Nodes: {0}".format(len(self.nodes)))
 
     def collides(self, point):
         # TODO: Determine whether the point collides
