@@ -41,11 +41,8 @@ class GraphPlanner(object):
         self.extract_polygons()
 
     def extract_polygons(self):
-        BUFFER = 1   # Add 1 Meter buffer due to drones overshoot characteristics
         for i in range(self.data.shape[0]):
             north, east, alt, d_north, d_east, d_alt = self.data[i, :]
-            d_north += BUFFER
-            d_east += BUFFER
             LL = ((north - d_north), (east - d_east))
             UL = ((north + d_north), (east - d_east))
             LR = ((north - d_north), (east + d_east))
@@ -57,6 +54,9 @@ class GraphPlanner(object):
         self.tree = KDTree(list(self.polygons.keys()))
 
     def generate_nodes(self, max_num_nodes=1000, max_alt=10):
+        BUFFER = 2   # Add 2 Meter buffer due to drones overshoot characteristics
+        # Add the corners of buildings as they would usually describe street junctions
+        # This will add to available nodes to form a more robust graph
         xmin = np.min(self.data[:, 0] - self.data[:, 3])
         xmax = np.max(self.data[:, 0] + self.data[:, 3])
 
@@ -71,6 +71,19 @@ class GraphPlanner(object):
         zvals = np.random.uniform(zmin, zmax, max_num_nodes)
 
         self.nodes = list(zip(xvals, yvals, zvals))
+
+        for i in range(self.data.shape[0]):
+            north, east, alt, d_north, d_east, d_alt = self.data[i, :]
+            d_north += BUFFER
+            d_east += BUFFER
+            LL = ((north - d_north), (east - d_east))
+            UL = ((north + d_north), (east - d_east))
+            LR = ((north - d_north), (east + d_east))
+            UR = ((north + d_north), (east + d_east))
+            self.nodes.append((LL) + (max_alt,))
+            self.nodes.append((UL) + (max_alt,))
+            self.nodes.append((LR) + (max_alt,))
+            self.nodes.append((UR) + (max_alt,))
         # prune Nodes
         to_keep = []
         for point in self.nodes:
