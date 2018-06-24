@@ -344,8 +344,6 @@ class MotionPlanning(Drone):
         graph.add_start_goal(graph_start, graph_goal)
         print('Local Graph Start and Goal: ', graph_start, graph_goal)
         g = graph.create_graph()
-        for node in g:
-            print(" Graph node: {0}".format(node))
         # TODO: adapt to set goal as latitude / longitude position and convert
 
         # Run A* to find a path from start to goal
@@ -356,9 +354,12 @@ class MotionPlanning(Drone):
         path, _ = a_star(grid, heuristic, grid_start, grid_goal)
         # TODO: prune path to minimize number of waypoints
         path = self.prune_path(path)
+        graph_path = self.prune_path(graph_path)
         # TODO (if you're feeling ambitious): Try a different approach altogether!
         # Convert path to waypoints
         waypoints = [[p[0] + north_offset, p[1] + east_offset, TARGET_ALTITUDE, 0] for p in path]
+        graph_waypoints = [[p[0], p[1], TARGET_ALTITUDE, 0] for p in graph_path]
+        print(graph_waypoints)
         # Set self.waypoints
         self.waypoints = waypoints
         # TODO: send waypoints to sim (this is just for visualization of waypoints)
