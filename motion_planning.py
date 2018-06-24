@@ -194,13 +194,16 @@ class GraphPlanner(object):
 
 class MotionPlanning(Drone):
 
-    def __init__(self, connection=None):
+    def __init__(self, connection=None, method, n_goal, e_goal):
         super().__init__(connection)
 
         self.target_position = np.array([0.0, 0.0, 0.0])
         self.waypoints = []
         self.in_mission = True
         self.check_state = {}
+        self.method = method  # True means use Graph method instead of Grid
+        self.n_goal = n_goal  # North offset from Goal
+        self.e_goal = e_goal  # East offset from Goal
 
         # initial state
         self.flight_state = States.MANUAL
@@ -301,7 +304,7 @@ class MotionPlanning(Drone):
             i = i + 1
         return ret
 
-    def plan_path(self):
+    def plan_path(self, graph = True):
         self.flight_state = States.PLANNING
         print("Searching for a path ...")
         TARGET_ALTITUDE = 5
@@ -330,49 +333,54 @@ class MotionPlanning(Drone):
         print('Calculated local Position: {0}'.format(current_local_position))
         # Read in obstacle map
         data = np.loadtxt('colliders.csv', delimiter=',', dtype='Float64', skiprows=2)
-        
+
         # Define a grid for a particular altitude and safety margin around obstacles
-        graph = GraphPlanner(data)
-        graph.generate_nodes(max_alt=TARGET_ALTITUDE)
-        grid, north_offset, east_offset = create_grid(data, TARGET_ALTITUDE, SAFETY_DISTANCE)
-        print("North offset = {0}, east offset = {1}".format(north_offset, east_offset))
+        if self.method:
+            graph = GraphPlanner(data)
+            graph.generate_nodes(max_alt=TARGET_ALTITUDE)
+        else:
+            grid, north_offset, east_offset = create_grid(data, TARGET_ALTITUDE, SAFETY_DISTANCE)
+            print("North offset = {0}, east offset = {1}".format(north_offset, east_offset))
         # Define starting point on the grid (this is just grid center)
         # grid_start = (-north_offset, -east_offset)
         # TODO: convert start position to current position rather than map center
-        grid_start = (int(np.floor(self.local_position[0])) - north_offset,
-                      int(np.floor(self.local_position[1])) - east_offset)
-        # Set goal as some arbitrary position on the grid
-        grid_goal = (int(np.floor(self.local_position[0] + 3)) - north_offset,
-                     int(np.floor(self.local_position[1] + 0)) - east_offset)
+        start = (self.local_position[0], self.local_position[1], TARGET_ALTITUDE)
+        goal = (self.local_position[0] + self.n_goal, self.local_position[1] + self.e_goal, TARGET_ALTITUDE)
+        if self.method:
+            graph.add_start_goal(start, goal)
+        else:
+            start = (int(np.floor(start[0])) - north_offset,
+                    int(np.floor(start[1])) - east_offset)
+            # Set goal as some arbitrary position on the grid
+            goal = (int(np.floor(goal[0])) - north_offset,
+                    int(np.floor(goal[1])) - east_offset)
 
-        graph_start = (self.local_position[0], self.local_position[1], TARGET_ALTITUDE)
-        graph_goal = (self.local_position[0] + 40, self.local_position[1] + 50, TARGET_ALTITUDE)
-        graph.add_start_goal(graph_start, graph_goal)
-        print('Local Graph Start and Goal: ', graph_start, graph_goal)
-        g = graph.create_graph()
+        print('Local Start and Goal: ', start, goal)
+
         # TODO: adapt to set goal as latitude / longitude position and convert
 
         # Run A* to find a path from start to goal
         # TODO: add diagonal motions with a cost of sqrt(2) to your A* implementation
         # or move to a different search space such as a graph (not done here)
-        print('Local Start and Goal: ', grid_start, grid_goal)
-        graph_path, _ = graph.a_star(heuristic)
-        print("Path before Pruning: {0}".format(len(graph_path)))
-        path, _ = a_star(grid, heuristic, grid_start, grid_goal)
+        if self.method:
+            g = graph.create_graph()
+            path, _ = graph.a_star(heuristic)
+        else:
+            path, _ = a_star(grid, heuristic, start, goal)
+
+        print("Path Nodes before Pruning: {0}".format(len(path)))
         # TODO: prune path to minimize number of waypoints
         path = self.prune_path(path)
-        for point in path:
-            print("Point: {0}".format(point))
-        graph_path = self.prune_path(graph_path)
-        print("Path: {0}".format(len(graph_path)))
+        print("Path Nodes After Pruning: {0}".format(len(path)))
         # TODO (if you're feeling ambitious): Try a different approach altogether!
         # Convert path to waypoints
-        waypoints = [[p[0] + north_offset, p[1] + east_offset, TARGET_ALTITUDE, 0] for p in path]
-        graph_waypoints = [list(self.convert_to_int([p[0], p[1], TARGET_ALTITUDE, 0])) for p in graph_path]
-        for  point in graph_waypoints:
-            print("Point: {0}".format(point))
+        if self.method:
+            waypoints = [list(self.convert_to_int([p[0], p[1], TARGET_ALTITUDE, 0])) for p in path]
+        else:
+            waypoints = [[p[0] + north_offset, p[1] + east_offset, TARGET_ALTITUDE, 0] for p in path]
+
         # Set self.waypoints
-        self.waypoints = graph_waypoints
+        self.waypoints = waypoints
         # TODO: send waypoints to sim (this is just for visualization of waypoints)
         self.send_waypoints()
 
@@ -393,10 +401,13 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--port', type=int, default=5760, help='Port number')
     parser.add_argument('--host', type=str, default='127.0.0.1', help="host address, i.e. '127.0.0.1'")
+    parser.add_argument('--graph', type=bool, default='False', help="Use Graph method for planning")
+    parser.add_argument('--n_goal', type=float, default='50.0', help="North Offset from Start for Goal" )
+    parser.add_argument('--e_goal', type=float, default='50.0', help="East Offset from Start for Goal")
     args = parser.parse_args()
 
     conn = MavlinkConnection('tcp:{0}:{1}'.format(args.host, args.port), timeout=60)
-    drone = MotionPlanning(conn)
+    drone = MotionPlanning(conn, args.graph, args.n_goal, args.e_goal)
     time.sleep(1)
 
     drone.start()

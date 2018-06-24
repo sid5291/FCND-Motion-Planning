@@ -55,6 +55,10 @@ class Action(Enum):
     EAST = (0, 1, 1)
     NORTH = (-1, 0, 1)
     SOUTH = (1, 0, 1)
+    NE = (-1, 1, np.sqrt(2))
+    SE = (1, 1, np.sqrt(2))
+    SW = (1, -1, np.sqrt(2))
+    NW = (-1, -1, np.sqrt(2))
 
     @property
     def cost(self):
@@ -62,7 +66,7 @@ class Action(Enum):
 
     @property
     def delta(self):
-        return (self.value[0], self.value[1])
+        return np.array([self.value[0], self.value[1]])
 
 
 def valid_actions(grid, current_node):
@@ -75,15 +79,20 @@ def valid_actions(grid, current_node):
 
     # check if the node is off the grid or
     # it's an obstacle
-
-    if x - 1 < 0 or grid[x - 1, y] == 1:
-        valid_actions.remove(Action.NORTH)
-    if x + 1 > n or grid[x + 1, y] == 1:
-        valid_actions.remove(Action.SOUTH)
-    if y - 1 < 0 or grid[x, y - 1] == 1:
-        valid_actions.remove(Action.WEST)
-    if y + 1 > m or grid[x, y + 1] == 1:
-        valid_actions.remove(Action.EAST)
+    for action in valid_actions:
+        grid_point = (np.array([x, y]) - action.delta)
+        if (grid_point < (0,0)).any():
+            valid_actions.remove(action)
+        elif grid[grid_point[0], grid_point[1]] == 1:
+            valid_actions.remove(action)
+    # if x - 1 < 0 or grid[x - 1, y] == 1:
+    #     valid_actions.remove(Action.NORTH)
+    # if x + 1 > n or grid[x + 1, y] == 1:
+    #     valid_actions.remove(Action.SOUTH)
+    # if y - 1 < 0 or grid[x, y - 1] == 1:
+    #     valid_actions.remove(Action.WEST)
+    # if y + 1 > m or grid[x, y + 1] == 1:
+    #     valid_actions.remove(Action.EAST)
 
     return valid_actions
 
