@@ -111,32 +111,19 @@ class GraphPlanner(object):
     # In NED frame (x,y,z) or (n,e,d)
     def add_start_goal(self, start, goal):
         if not self.collides(start):
-            self.nodes.append(start)
             self.start = start
         else:
             print("Start Collides")
             self.start = self.find_nearest_node(start)
             print("New Start-> {0}".format(self.start))
-
+        self.nodes.append(self.start)
         if not self.collides(goal):
-            self.nodes.append(goal)
             self.goal = goal
         else:
             print("Goal Collides")
             self.goal = self.find_nearest_node(goal)
             print("New Goal-> {0}".format(self.goal))
-
-        array = np.array(self.nodes)
-        points = array[..., (0, 1)]
-        tree = KDTree(points)
-        for point in points:
-            nn = tree.query([point], k=10, return_distance=False)[0]
-            for node in nn:
-                if self.can_connect(point, points[node]):
-                    dist = LA.norm(np.array(point) - np.array(points[node]))
-                    if dist:
-                        self.graph.add_edge(tuple(point), tuple(points[node]), weight=dist)
-        return self.graph
+        self.nodes.append(self.goal)
 
     def create_graph(self):
         if len(self.nodes) == 0:
@@ -154,15 +141,16 @@ class GraphPlanner(object):
         return self.graph
 
     def a_star(self, h):
-
         if (self.start is None) or (self.goal is None):
             print("ERROR: Please add the start and goal to graph using add_start_and_goal")
             return
+        start = tuple(self.start[0], self.start[1])
+        goal = tuple(self.goal[0], self.goal[1])
         path = []
         path_cost = 0
         queue = PriorityQueue()
-        queue.put((0, self.start))
-        visited = set(self.start)
+        queue.put((0, start))
+        visited = set(start)
 
         branch = {}
         found = False
@@ -170,19 +158,19 @@ class GraphPlanner(object):
         while not queue.empty():
             item = queue.get()
             current_node = item[1]
-            if current_node == self.start:
+            if current_node == start:
                 current_cost = 0.0
             else:
                 current_cost = branch[current_node][0]
 
-            if current_node == self.goal:
+            if current_node == goal:
                 print('Found a path.')
                 found = True
                 break
             else:
-                for neighbor in self.graph[current_node]:
+                for neighbor in graph[current_node]:
                     next_node = neighbor
-                    branch_cost = current_cost + self.graph[current_node][next_node]['weight']
+                    branch_cost = current_cost + graph[current_node][next_node]['weight']
                     queue_cost = branch_cost + h(next_node, goal)
 
                     if next_node not in visited:
@@ -191,10 +179,10 @@ class GraphPlanner(object):
                         queue.put((queue_cost, next_node))
 
         if found:
-            n = self.goal
+            n = goal
             path_cost = branch[n][0]
-            path.append(self.goal)
-            while branch[n][1] != self.start:
+            path.append(goal)
+            while branch[n][1] != start:
                 path.append(branch[n][1])
                 n = branch[n][1]
             path.append(branch[n][1])
