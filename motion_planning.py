@@ -92,7 +92,7 @@ class GraphPlanner(object):
         # prune nodes within BUFFER distance to one node
         for point in to_keep:
             dist = np.linalg.norm(np.array(point)-np.array(to_keep), axis=1)
-            indices = np.where(dist < 10.0)
+            indices = np.where(dist < 10.0)[0]
             for i in indices:
                 if to_keep[i] != point:
                     del to_keep[i]
