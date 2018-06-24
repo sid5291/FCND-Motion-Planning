@@ -301,7 +301,8 @@ class MotionPlanning(Drone):
             cells = bresenham(p1[0], p1[1], p3[0], p3[1])
             if p2 in cells:
                 del ret[i+1]
-            i = i + 1
+            else:
+                i = i + 1
         return ret
 
     def plan_path(self, graph = True):
