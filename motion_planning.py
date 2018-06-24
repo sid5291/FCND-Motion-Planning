@@ -37,6 +37,7 @@ class GraphPlanner(object):
         self.nodes = list()
         self.tree = list()  # KDTree for generated polygons
         self.graph = nx.Graph()
+        self.extract_polygons()
 
     def extract_polygons(self):
         for i in range(self.data.shape[0]):
@@ -66,6 +67,12 @@ class GraphPlanner(object):
         zvals = np.random.uniform(zmin, zmax, max_num_nodes)
 
         self.nodes = list(zip(xvals, yvals, zvals))
+        # prune Nodes
+        to_keep = []
+        for point in self.nodes:
+            if not self.collides(point):
+                to_keep.append(point)
+        self.nodes = to_keep
 
     def collides(self, point):
         # TODO: Determine whether the point collides
@@ -132,14 +139,8 @@ class GraphPlanner(object):
         return self.graph
 
     def create_graph(self):
-        self.extract_polygons()
         if len(self.nodes) == 0:
             self.generate_nodes()
-        to_keep = []
-        for point in self.nodes:
-            if not self.collides(point):
-                to_keep.append(point)
-        self.nodes = to_keep
         array = np.array(self.nodes)
         points = array[..., (0, 1)]
         tree = KDTree(points)
@@ -339,7 +340,6 @@ class MotionPlanning(Drone):
         # Define a grid for a particular altitude and safety margin around obstacles
         graph = GraphPlanner(data)
         graph.generate_nodes(max_alt=TARGET_ALTITUDE)
-        g     = graph.create_graph()
         grid, north_offset, east_offset = create_grid(data, TARGET_ALTITUDE, SAFETY_DISTANCE)
         print("North offset = {0}, east offset = {1}".format(north_offset, east_offset))
         # Define starting point on the grid (this is just grid center)
@@ -355,6 +355,7 @@ class MotionPlanning(Drone):
         graph_goal = (self.local_position[0] + 40, self.local_position[1] + 50, TARGET_ALTITUDE)
         graph.add_start_goal(graph_start, graph_goal)
         print('Local Graph Start and Goal: ', graph_start, graph_goal)
+        g = graph.create_graph()
         # TODO: adapt to set goal as latitude / longitude position and convert
 
         # Run A* to find a path from start to goal
