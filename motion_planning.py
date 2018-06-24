@@ -104,7 +104,7 @@ class GraphPlanner(object):
         return True
 
     def find_nearest_node(self, point):
-        temp = np.array(self.graph)
+        temp = np.array(self.nodes)
         near_point = temp[np.argmin(np.linalg.norm(np.array(point) - np.array(temp), axis=1))]
         return tuple(near_point)
 
