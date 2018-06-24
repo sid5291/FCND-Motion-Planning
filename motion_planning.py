@@ -53,7 +53,7 @@ class GraphPlanner(object):
             self.polygons[(north, east)] = (p, height)
         self.tree = KDTree(list(self.polygons.keys()))
 
-    def generate_nodes(self, max_num_nodes=200, max_alt =5.0):
+    def generate_nodes(self, max_num_nodes=1000, max_alt =5.0):
         BUFFER = 2.0   # Add 2 Meter buffer due to drones overshoot characteristics
         # Add the corners of buildings as they would usually describe street junctions
         # This will add to available nodes to form a more robust graph
@@ -72,31 +72,31 @@ class GraphPlanner(object):
 
         self.nodes = list(zip(xvals, yvals, zvals))
 
-        for i in range(self.data.shape[0]):
-            north, east, alt, d_north, d_east, d_alt = self.data[i, :]
-            d_north += BUFFER
-            d_east += BUFFER
-            LL = ((north - d_north), (east - d_east))
-            UL = ((north + d_north), (east - d_east))
-            LR = ((north - d_north), (east + d_east))
-            UR = ((north + d_north), (east + d_east))
-            self.nodes.append((LL) + (max_alt,))
-            self.nodes.append((UL) + (max_alt,))
-            self.nodes.append((LR) + (max_alt,))
-            self.nodes.append((UR) + (max_alt,))
+        # for i in range(self.data.shape[0]):
+        #     north, east, alt, d_north, d_east, d_alt = self.data[i, :]
+        #     d_north += BUFFER
+        #     d_east += BUFFER
+        #     LL = ((north - d_north), (east - d_east))
+        #     UL = ((north + d_north), (east - d_east))
+        #     LR = ((north - d_north), (east + d_east))
+        #     UR = ((north + d_north), (east + d_east))
+        #     self.nodes.append((LL) + (max_alt,))
+        #     self.nodes.append((UL) + (max_alt,))
+        #     self.nodes.append((LR) + (max_alt,))
+        #     self.nodes.append((UR) + (max_alt,))
         # prune colliding nodes Nodes
         to_keep = []
         for point in self.nodes:
             if not self.collides(point):
                 to_keep.append(point)
         # prune nodes within BUFFER distance to one node
-        for point in to_keep:
-            array = np.array(to_keep)
-            dist = np.linalg.norm(np.array(point)-array, axis=1)
-            nns = array[np.where(dist < 10.0)[0]]
-            for nn in nns:
-                if tuple(nn) != point:
-                    to_keep.remove(tuple(nn))
+        # for point in to_keep:
+        #     array = np.array(to_keep)
+        #     dist = np.linalg.norm(np.array(point)-array, axis=1)
+        #     nns = array[np.where(dist < 10.0)[0]]
+        #     for nn in nns:
+        #         if tuple(nn) != point:
+        #             to_keep.remove(tuple(nn))
         self.nodes = to_keep
         print("Number of Nodes: {0}".format(len(self.nodes)))
 
