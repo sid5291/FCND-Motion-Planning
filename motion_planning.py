@@ -370,7 +370,7 @@ class MotionPlanning(Drone):
         for  point in graph_waypoints:
             print("Point: {0}".format(point))
         # Set self.waypoints
-        self.waypoints = waypoints
+        self.waypoints = graph_waypoints
         # TODO: send waypoints to sim (this is just for visualization of waypoints)
         self.send_waypoints()
 
