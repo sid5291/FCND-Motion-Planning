@@ -361,6 +361,8 @@ class MotionPlanning(Drone):
         path, _ = a_star(grid, heuristic, grid_start, grid_goal)
         # TODO: prune path to minimize number of waypoints
         path = self.prune_path(path)
+        for point in path:
+            print("Point: {0}".format(point))
         graph_path = self.prune_path(graph_path)
         print("Path: {0}".format(len(graph_path)))
         # TODO (if you're feeling ambitious): Try a different approach altogether!
