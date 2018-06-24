@@ -1,4 +1,5 @@
 import argparse
+import sys
 import time
 import msgpack
 from enum import Enum, auto
@@ -408,11 +409,12 @@ if __name__ == "__main__":
     parser.add_argument('--goal', nargs='+', help="Goal: Longitude Latitude (float)")
     args = parser.parse_args()
 
-    if (len(args.goal) != 2):
-        print(" Invalid or no global position goal entered, Using Offsets {0},{1}".format(args.n_goal, args.e_goal))
-        args.goal = None
-    else:
-        args.goal = tuple(args.goal)
+    if args.goal:
+        if (len(args.goal) != 2):
+            print(" Invalid global position Goal need to enter: --goal [Longitude] [Latitude]")
+            sys.exit(-1)
+        else:
+            args.goal = tuple(args.goal)
 
     conn = MavlinkConnection('tcp:{0}:{1}'.format(args.host, args.port), timeout=60)
     drone = MotionPlanning(args.graph, args.n_goal, args.e_goal, args.goal, conn)
