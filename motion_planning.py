@@ -289,7 +289,7 @@ class MotionPlanning(Drone):
 
     def prune_path(self, path):
         ret = [point for point in path]
-        i=0
+        i = 0
         while i < (len(ret) - 2):
             p1 = self.convert_to_int(ret[i])
             p2 = self.convert_to_int(ret[i + 1])
@@ -298,7 +298,7 @@ class MotionPlanning(Drone):
             cells = bresenham(p1[0], p1[1], p3[0], p3[1])
             if p2 in cells:
                 del ret[i+1]
-
+            i = i + 1
         return ret
 
     def plan_path(self):
