@@ -281,13 +281,19 @@ class MotionPlanning(Drone):
         data = msgpack.dumps(self.waypoints)
         self.connection._master.write(data)
 
+    def convert_to_int(self, point):
+        ret = list()
+        for i in point:
+            ret.append(int(np.floor(i)))
+        return tuple(ret)
+
     def prune_path(self, path):
         ret = [point for point in path]
         i=0
         while i < (len(ret) - 2):
-            p1 = ret[i]
-            p2 = ret[i + 1]
-            p3 = ret[i + 2]
+            p1 = self.convert_to_int(ret[i])
+            p2 = self.convert_to_int(ret[i + 1])
+            p3 = self.convert_to_int(ret[i + 2])
 
             cells = bresenham(p1[0], p1[1], p3[0], p3[1])
             if p2 in cells:
