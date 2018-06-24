@@ -357,10 +357,12 @@ class MotionPlanning(Drone):
         # or move to a different search space such as a graph (not done here)
         print('Local Start and Goal: ', grid_start, grid_goal)
         graph_path, _ = graph.a_star(heuristic)
+        print("Path before Pruning: {0}".format(len(graph_path)))
         path, _ = a_star(grid, heuristic, grid_start, grid_goal)
         # TODO: prune path to minimize number of waypoints
         path = self.prune_path(path)
         graph_path = self.prune_path(graph_path)
+        print("Path: {0}".format(len(graph_path)))
         # TODO (if you're feeling ambitious): Try a different approach altogether!
         # Convert path to waypoints
         waypoints = [[p[0] + north_offset, p[1] + east_offset, TARGET_ALTITUDE, 0] for p in path]
