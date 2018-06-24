@@ -41,7 +41,7 @@ class GraphPlanner(object):
         self.extract_polygons()
 
     def extract_polygons(self):
-        BUFFER = 2   # Add 2 Meter buffer due to drones overshoot characteristics
+        BUFFER = 1   # Add 1 Meter buffer due to drones overshoot characteristics
         for i in range(self.data.shape[0]):
             north, east, alt, d_north, d_east, d_alt = self.data[i, :]
             d_north += BUFFER
