@@ -194,7 +194,7 @@ class GraphPlanner(object):
 
 class MotionPlanning(Drone):
 
-    def __init__(self, connection=None, method, n_goal, e_goal):
+    def __init__(self, method, n_goal, e_goal, connection=None ):
         super().__init__(connection)
 
         self.target_position = np.array([0.0, 0.0, 0.0])
@@ -407,7 +407,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     conn = MavlinkConnection('tcp:{0}:{1}'.format(args.host, args.port), timeout=60)
-    drone = MotionPlanning(conn, args.graph, args.n_goal, args.e_goal)
+    drone = MotionPlanning(args.graph, args.n_goal, args.e_goal, conn)
     time.sleep(1)
 
     drone.start()
