@@ -54,7 +54,7 @@ class GraphPlanner(object):
         self.tree = KDTree(list(self.polygons.keys()))
 
     def generate_nodes(self, max_num_nodes=1000, max_alt=10):
-        BUFFER = 2   # Add 2 Meter buffer due to drones overshoot characteristics
+        BUFFER = 2.0   # Add 2 Meter buffer due to drones overshoot characteristics
         # Add the corners of buildings as they would usually describe street junctions
         # This will add to available nodes to form a more robust graph
         xmin = np.min(self.data[:, 0] - self.data[:, 3])
@@ -89,9 +89,13 @@ class GraphPlanner(object):
         for point in self.nodes:
             if not self.collides(point):
                 to_keep.append(point)
-        # prune very nodes within 2m
-        #for point in to_keep:
-
+        # prune nodes within BUFFER distance to one node
+        for point in to_keep:
+            dist = np.linalg.norm(np.array(point)-np.array(to_keep), axis=1)
+            indices = np.where(dist < BUFFER)
+            for i in indices:
+                if to_keep[i] != point:
+                    del to_keep[i]
         self.nodes = to_keep
         print("Number of Nodes: {0}".format(len(self.nodes)))
 
