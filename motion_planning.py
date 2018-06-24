@@ -356,7 +356,8 @@ class MotionPlanning(Drone):
         graph.add_start_goal(graph_start, graph_goal)
         print('Local Graph Start and Goal: ', graph_start, graph_goal)
         g = graph.create_graph()
-        print(g)
+        for node in g:
+            print(" Graph node: {0}".format(node))
         # TODO: adapt to set goal as latitude / longitude position and convert
 
         # Run A* to find a path from start to goal
