@@ -112,13 +112,10 @@ class GraphPlanner(object):
 
     def can_connect(self, point1, point2):
         line = LineString(((point1), (point2)))
+        midpoint = ((point1[0]+point2[0])/2, (point1[1]+point2[1])/2)
         closest_centroids = self.tree.query([(point1[0], point1[1])], k=10, return_distance=False)[0]
-        for centroid in closest_centroids:
-            key = list(self.polygons.keys())[centroid]
-            poly = self.polygons[key]
-            if poly[0].crosses(line):
-                return False
-        closest_centroids = self.tree.query([(point2[0], point2[1])], k=10, return_distance=False)[0]
+        closest_centroids.append(self.tree.query([(point2[0], point2[1])], k=10, return_distance=False)[0])
+        closest_centroids.append(self.tree.query([(midpoint[0], midpoint[1])], k=10, return_distance=False)[0])
         for centroid in closest_centroids:
             key = list(self.polygons.keys())[centroid]
             poly = self.polygons[key]
