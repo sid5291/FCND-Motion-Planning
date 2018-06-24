@@ -351,7 +351,7 @@ class MotionPlanning(Drone):
         if self.goal is None:
             goal = (self.local_position[0] + self.n_goal, self.local_position[1] + self.e_goal, TARGET_ALTITUDE)
         else:
-            goal = global_to_local(np.array([self.goal[0], self.goal[1], TARGET_ALTITUDE]), self.global_home)
+            goal = global_to_local(np.array([float(self.goal[0]), float(self.goal[1]), TARGET_ALTITUDE]), self.global_home)
         if self.method:
             graph.add_start_goal(start, goal)
         else:
