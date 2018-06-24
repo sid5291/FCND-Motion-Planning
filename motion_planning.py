@@ -110,17 +110,24 @@ class GraphPlanner(object):
                     return True
         return False
 
+    def convert_to_int(self, point):
+        ret = list()
+        for i in point:
+            ret.append(int(np.floor(i)))
+        return tuple(ret)
+
     def can_connect(self, point1, point2):
         line = LineString(((point1), (point2)))
-        midpoint = ((point1[0]+point2[0])/2, (point1[1]+point2[1])/2)
-        closest_centroids = self.tree.query([(point1[0], point1[1])], k=10, return_distance=False)[0]
-        np.concatenate((closest_centroids, (self.tree.query([(point2[0], point2[1])], k=10, return_distance=False)[0])))
-        np.concatenate((closest_centroids, (self.tree.query([(midpoint[0], midpoint[1])], k=10, return_distance=False)[0])))
-        for centroid in closest_centroids:
-            key = list(self.polygons.keys())[centroid]
-            poly = self.polygons[key]
-            if poly[0].crosses(line):
-                return False
+        point1 = self.convert_to_int(point1)
+        point2 = self.convert_to_int(point2)
+        cells = bresenham(point1[0], point1[1], point2[0], point2[1])
+        for cell in cells:
+            closest_centroids = self.tree.query([(cell[0], cell[1])], k=3, return_distance=False)[0]
+            for centroid in closest_centroids:
+                key = list(self.polygons.keys())[centroid]
+                poly = self.polygons[key]
+                if poly[0].crosses(line):
+                    return False
         return True
 
     def find_nearest_node(self, point):
