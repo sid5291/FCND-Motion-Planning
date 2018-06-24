@@ -168,9 +168,9 @@ class GraphPlanner(object):
                 found = True
                 break
             else:
-                for neighbor in graph[current_node]:
+                for neighbor in self.graph[current_node]:
                     next_node = neighbor
-                    branch_cost = current_cost + graph[current_node][next_node]['weight']
+                    branch_cost = current_cost + self.graph[current_node][next_node]['weight']
                     queue_cost = branch_cost + h(next_node, goal)
 
                     if next_node not in visited:
