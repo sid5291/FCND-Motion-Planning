@@ -305,7 +305,7 @@ class MotionPlanning(Drone):
                 i = i + 1
         return ret
 
-    def plan_path(self, graph = True):
+    def plan_path(self):
         self.flight_state = States.PLANNING
         print("Searching for a path ...")
         TARGET_ALTITUDE = 5
@@ -337,15 +337,19 @@ class MotionPlanning(Drone):
 
         # Define a grid for a particular altitude and safety margin around obstacles
         if self.method:
+            print(" Using the Graph Method")
             graph = GraphPlanner(data)
             graph.generate_nodes(max_alt=TARGET_ALTITUDE)
         else:
+            print(" Using the Grid Method")
             grid, north_offset, east_offset = create_grid(data, TARGET_ALTITUDE, SAFETY_DISTANCE)
             print("North offset = {0}, east offset = {1}".format(north_offset, east_offset))
         # Define starting point on the grid (this is just grid center)
         # grid_start = (-north_offset, -east_offset)
         # TODO: convert start position to current position rather than map center
         start = (self.local_position[0], self.local_position[1], TARGET_ALTITUDE)
+
+        # TODO: adapt to set goal as latitude / longitude position and convert
         goal = (self.local_position[0] + self.n_goal, self.local_position[1] + self.e_goal, TARGET_ALTITUDE)
         if self.method:
             graph.add_start_goal(start, goal)
@@ -355,11 +359,7 @@ class MotionPlanning(Drone):
             # Set goal as some arbitrary position on the grid
             goal = (int(np.floor(goal[0])) - north_offset,
                     int(np.floor(goal[1])) - east_offset)
-
         print('Local Start and Goal: ', start, goal)
-
-        # TODO: adapt to set goal as latitude / longitude position and convert
-
         # Run A* to find a path from start to goal
         # TODO: add diagonal motions with a cost of sqrt(2) to your A* implementation
         # or move to a different search space such as a graph (not done here)
@@ -402,9 +402,9 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--port', type=int, default=5760, help='Port number')
     parser.add_argument('--host', type=str, default='127.0.0.1', help="host address, i.e. '127.0.0.1'")
-    parser.add_argument('--graph', type=bool, default='False', help="Use Graph method for planning")
-    parser.add_argument('--n_goal', type=float, default='50.0', help="North Offset from Start for Goal" )
-    parser.add_argument('--e_goal', type=float, default='50.0', help="East Offset from Start for Goal")
+    parser.add_argument('--graph', type=bool, default=False, help="Use Graph method for planning")
+    parser.add_argument('--n_goal', type=float, default=50.0, help="North Offset from Start for Goal" )
+    parser.add_argument('--e_goal', type=float, default=50.0, help="East Offset from Start for Goal")
     args = parser.parse_args()
 
     conn = MavlinkConnection('tcp:{0}:{1}'.format(args.host, args.port), timeout=60)
