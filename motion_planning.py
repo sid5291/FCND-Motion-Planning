@@ -194,7 +194,7 @@ class GraphPlanner(object):
 
 class MotionPlanning(Drone):
 
-    def __init__(self, method, n_goal, e_goal, connection=None ):
+    def __init__(self, method, n_goal, e_goal, goal, connection=None ):
         super().__init__(connection)
 
         self.target_position = np.array([0.0, 0.0, 0.0])
@@ -204,7 +204,7 @@ class MotionPlanning(Drone):
         self.method = method  # True means use Graph method instead of Grid
         self.n_goal = n_goal  # North offset from Goal
         self.e_goal = e_goal  # East offset from Goal
-
+        self.goal = goal
         # initial state
         self.flight_state = States.MANUAL
 
@@ -322,9 +322,6 @@ class MotionPlanning(Drone):
         # TODO: set home position to (lon0, lat0, 0)
         # Ensure to invert Lat Lon as it is fed to set_home_position as Lon Lat
         self.set_home_position(global_home_position[1], global_home_position[0], global_home_position[2])
-        self._longitude = global_home_position[1]
-        self._latitude =  global_home_position[0]
-        self._altitude =  global_home_position[2]
         # TODO: retrieve current global position
         current_global_position = self.global_position
         # TODO: convert to current local position using global_to_local()
@@ -350,7 +347,10 @@ class MotionPlanning(Drone):
         start = (self.local_position[0], self.local_position[1], TARGET_ALTITUDE)
 
         # TODO: adapt to set goal as latitude / longitude position and convert
-        goal = (self.local_position[0] + self.n_goal, self.local_position[1] + self.e_goal, TARGET_ALTITUDE)
+        if self.goal is None:
+            goal = (self.local_position[0] + self.n_goal, self.local_position[1] + self.e_goal, TARGET_ALTITUDE)
+        else:
+            goal = global_to_local(np.array([self.goal[0], self.goal[1], TARGET_ALTITUDE]), self.global_home)
         if self.method:
             graph.add_start_goal(start, goal)
         else:
@@ -405,10 +405,17 @@ if __name__ == "__main__":
     parser.add_argument('--graph', action='store_true', help="Use Graph method for planning")
     parser.add_argument('--n_goal', type=float, default=50.0, help="North Offset from Start for Goal" )
     parser.add_argument('--e_goal', type=float, default=50.0, help="East Offset from Start for Goal")
+    parser.add_argument('--goal', nargs='+', help="Goal: Longitude Latitude (float)")
     args = parser.parse_args()
 
+    if (len(args.goal) != 2):
+        print(" Invalid or no global position goal entered, Using Offsets {0},{1}".format(args.n_goal, args.e_goal))
+        args.goal = None
+    else:
+        args.goal = tuple(args.goal)
+
     conn = MavlinkConnection('tcp:{0}:{1}'.format(args.host, args.port), timeout=60)
-    drone = MotionPlanning(args.graph, args.n_goal, args.e_goal, conn)
+    drone = MotionPlanning(args.graph, args.n_goal, args.e_goal, args.goal, conn)
     time.sleep(1)
 
     drone.start()
