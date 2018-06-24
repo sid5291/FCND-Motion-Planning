@@ -120,7 +120,7 @@ class GraphPlanner(object):
         line = LineString(((point1), (point2)))
         point1 = self.convert_to_int(point1)
         point2 = self.convert_to_int(point2)
-        cells = bresenham(point1[0], point1[1], point2[0], point2[1])
+        cells = list(bresenham(point1[0], point1[1], point2[0], point2[1]))
         for cell in cells[::10]:
             closest_centroids = self.tree.query_radius([(cell[0], cell[1])], r=10.0, return_distance=False)[0]
             for centroid in closest_centroids:
