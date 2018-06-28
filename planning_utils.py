@@ -1,5 +1,5 @@
 from enum import Enum
-from queue import PriorityQueue
+from queue import PriorityQueue, Queue
 import numpy as np
 
 
@@ -95,6 +95,27 @@ def valid_actions(grid, current_node):
     #     valid_actions.remove(Action.EAST)
 
     return valid_actions
+
+# BFS search for nearest valid goal
+def find_nearest_valid_goal(grid, goal):
+    queue = Queue()
+
+    queue.put(goal)
+    visited = set(goal)
+
+    while not queue.empty():
+        current_node = queue.get()
+
+        if grid[current_node[0], current_node[1]] == 0:
+            return current_node
+
+        for action in list(Action):
+            da = action.delta
+            next_node = (current_node[0] + da[0], current_node[1] + da[1])
+            if next_node not in visited:
+                queue.put(next_node)
+                visited.add(next_node)
+
 
 
 def a_star(grid, h, start, goal):

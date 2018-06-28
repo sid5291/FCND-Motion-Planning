@@ -12,7 +12,7 @@ import numpy as np
 from queue import PriorityQueue
 
 
-from planning_utils import a_star, heuristic, create_grid
+from planning_utils import a_star, heuristic, create_grid, find_nearest_valid_goal
 from udacidrone import Drone
 from udacidrone.connection import MavlinkConnection
 from udacidrone.messaging import MsgID
@@ -369,6 +369,7 @@ class MotionPlanning(Drone):
                     int(np.floor(goal[1])) - east_offset)
             if grid[goal[0], goal[1]] == 1:
                 print("Goal lies in Polygon")
+                print("Goal to be used {0}".format(find_nearest_valid_goal(grid, goal)))
                 return
         print('Local Start and Goal: ', start, goal)
         # Run A* to find a path from start to goal
