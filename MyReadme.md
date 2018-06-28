@@ -38,6 +38,10 @@
 #### Set Goal position
 1. Use either a given north and east offset or a global position (in lat,lon) to set the goal position in the local frame
 
+#### Grid Method
+1. The goal position is checked with the `grid` to see if it is obstructed
+2. If Obstructed we use the `find_nearest_valid_goal` function to find the nearest unobstructed goal using a BFS search
+
 #### Graph Method:
 1. Start and Goal Positions are also added to the list of nodes use to generate the graphs (if either collide the nearest random node is selected)
 
