@@ -81,6 +81,7 @@ def valid_actions(grid, current_node):
     # it's an obstacle
     for action in valid_actions:
         grid_point = (np.array([x, y]) - action.delta)
+        print((valid_actions, grid_point, (grid_point < (0, 0)).any(), (grid_point > (n, m)).any(), (grid[grid_point[0], grid_point[1]] == 1)))
         if (grid_point < (0, 0)).any() or \
            (grid_point > (n, m)).any() or \
            (grid[grid_point[0], grid_point[1]] == 1):
