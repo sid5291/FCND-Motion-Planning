@@ -79,9 +79,8 @@ def valid_actions(grid, current_node):
 
     # check if the node is off the grid or
     # it's an obstacle
-    for action in valid_actions:
+    for action in list(Action):
         grid_point = (np.array([x, y]) + action.delta)
-        #print((action, grid_point, (grid_point < (0, 0)).any(), (grid_point > (n, m)).any(), (grid[grid_point[0], grid_point[1]] == 1)))
         if (grid_point < (0, 0)).any() or \
            (grid_point > (n, m)).any() or \
            (grid[grid_point[0], grid_point[1]] == 1):

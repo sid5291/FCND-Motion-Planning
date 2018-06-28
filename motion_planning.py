@@ -367,6 +367,9 @@ class MotionPlanning(Drone):
             # Set goal as some arbitrary position on the grid
             goal = (int(np.floor(goal[0])) - north_offset,
                     int(np.floor(goal[1])) - east_offset)
+            if(grid[goal[0].goal[1]] == 1):
+                print("Goal lies in Polygon")
+                return
         print('Local Start and Goal: ', start, goal)
         # Run A* to find a path from start to goal
         # TODO: add diagonal motions with a cost of sqrt(2) to your A* implementation
