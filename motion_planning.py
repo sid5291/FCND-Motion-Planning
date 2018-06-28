@@ -369,8 +369,8 @@ class MotionPlanning(Drone):
                     int(np.floor(goal[1])) - east_offset)
             if grid[goal[0], goal[1]] == 1:
                 print("Goal lies in Polygon")
-                print("Goal to be used {0}".format(find_nearest_valid_goal(grid, goal)))
-                return
+                goal = find_nearest_valid_goal(grid, goal)
+                print("Goal to be used {0}".format(goal))
         print('Local Start and Goal: ', start, goal)
         # Run A* to find a path from start to goal
         # TODO: add diagonal motions with a cost of sqrt(2) to your A* implementation
