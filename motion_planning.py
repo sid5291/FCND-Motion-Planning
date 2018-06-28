@@ -386,7 +386,7 @@ class MotionPlanning(Drone):
         if self.method:
             waypoints = [list(self.convert_to_int([p[0], p[1], TARGET_ALTITUDE, 0])) for p in path]
         else:
-            waypoints = [[p[0] + north_offset, p[1] + east_offset, TARGET_ALTITUDE, 0] for p in path]
+            waypoints = [[int(p[0] + north_offset), int(p[1] + east_offset), TARGET_ALTITUDE, 0] for p in path]
         print(waypoints)
         # Set self.waypoints
         self.waypoints = waypoints
